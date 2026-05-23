@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Premium SEO Best Practices -->
+    <title>UPYOG | Digital Municipal Services & UMEED Analytics Dashboard</title>
+    <meta name="description" content="Urban Platform for Delivery of Online Governance. Access Property Tax systems, Water Connections, Grievance Redressal, and UMEED Administrative Analytics Dashboard." />
+    <meta name="keywords" content="UPYOG, UMEED, Municipal Services, India E-Governance, Property Tax, Public Grievances, Digital India" />
+    <meta name="author" content="National Urban Digital Mission" />
+    
+    <!-- Modern Typography from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+      /* Quick preloader styles to keep the page black/white during setup */
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #0b0f19;
+        font-family: 'Inter', sans-serif;
+        overflow: hidden;
+      }
+      .preloader {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: #0b0f19;
+        color: #ffffff;
+        z-index: 9999;
+        transition: opacity 0.5s ease;
+      }
+      .preloader-spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: #f97316;
+        animation: spin 1s ease-in-out infinite;
+        margin-bottom: 20px;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      .preloader-text {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.2rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        background: linear-gradient(135deg, #f97316 0%, #a855f7 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Premium Preloader -->
+    <div id="preloader" class="preloader">
+      <div class="preloader-spinner"></div>
+      <div class="preloader-text">UPYOG ONLINE</div>
+    </div>
+
+    <!-- Active Canvas Background Particles -->
+    <canvas id="particle-canvas" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 0;"></canvas>
+
+    <!-- Core App Container -->
+    <div id="app"></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
