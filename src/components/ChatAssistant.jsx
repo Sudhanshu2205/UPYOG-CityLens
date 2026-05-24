@@ -296,7 +296,10 @@ _CORS Notice: If you are looking to run arbitrary general chat conversations wit
               onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}
               className="flex gap-2"
             >
+              <label htmlFor="chat-assistant-input" className="sr-only">Ask UPYOG Central Ledger AI</label>
               <input
+                id="chat-assistant-input"
+                name="chat-assistant-input"
                 type="text"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}

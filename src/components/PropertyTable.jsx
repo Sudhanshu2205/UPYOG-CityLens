@@ -121,7 +121,10 @@ export default function PropertyTable({ properties }) {
           {/* Search Box */}
           <div className="relative w-full sm:w-48">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+            <label htmlFor="property-search" className="sr-only">Search properties by ID, Owner or Address</label>
             <input
+              id="property-search"
+              name="property-search"
               type="text"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
@@ -131,7 +134,10 @@ export default function PropertyTable({ properties }) {
           </div>
 
           {/* Property Type Filter */}
+          <label htmlFor="property-type-filter" className="sr-only">Filter by Property Type</label>
           <select
+            id="property-type-filter"
+            name="property-type-filter"
             value={typeFilter}
             onChange={(e) => { setTypeFilter(e.target.value); setCurrentPage(1); playClick(); }}
             className="px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-white/10 dark:text-white text-slate-800 bg-white dark:bg-[#0c1220] focus:outline-none focus:ring-1 focus:ring-accent-saffron/40 font-outfit"
@@ -143,7 +149,10 @@ export default function PropertyTable({ properties }) {
           </select>
 
           {/* Status Filter */}
+          <label htmlFor="property-status-filter" className="sr-only">Filter by Audit Status</label>
           <select
+            id="property-status-filter"
+            name="property-status-filter"
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); playClick(); }}
             className="px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-white/10 dark:text-white text-slate-800 bg-white dark:bg-[#0c1220] focus:outline-none focus:ring-1 focus:ring-accent-saffron/40 font-outfit"
