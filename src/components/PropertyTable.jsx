@@ -27,16 +27,23 @@ export default function PropertyTable({ properties }) {
     return searchMatch && statusMatch && typeMatch;
   });
 
-  // 2. Sort filtered data
+  // 2. Sort filtered data safely
+  const VALID_SORT_COLUMNS = ['property_id', 'owner_name', 'annual_tax_inr', 'collection_inr', 'tenant', 'property_type', 'status'];
+
   const sorted = [...filtered].sort((a, b) => {
+    if (!VALID_SORT_COLUMNS.includes(sortCol)) return 0;
+    
     let valA = a[sortCol];
     let valB = b[sortCol];
 
     // Handle numbers vs strings
     if (typeof valA === 'string') {
-      return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      const stringB = typeof valB === 'string' ? valB : String(valB || '');
+      return sortAsc ? valA.localeCompare(stringB) : stringB.localeCompare(valA);
     } else {
-      return sortAsc ? valA - valB : valB - valA;
+      const numA = Number(valA || 0);
+      const numB = Number(valB || 0);
+      return sortAsc ? numA - numB : numB - numA;
     }
   });
 

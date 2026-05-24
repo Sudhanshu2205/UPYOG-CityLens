@@ -15,10 +15,10 @@ export function computeDataSummary(rawProperties) {
   let totalCollection = 0;
   let totalAnnualTax = 0;
 
-  // City-wise grouping
-  const cityGroup = {};
-  // Property type-wise grouping
-  const typeGroup = {};
+  // City-wise grouping using ES6 Maps to avoid prototype pollution
+  const cityGroup = new Map();
+  // Property type-wise grouping using ES6 Maps
+  const typeGroup = new Map();
 
   rawProperties.forEach(p => {
     const status = p.status.toLowerCase();
@@ -34,29 +34,31 @@ export function computeDataSummary(rawProperties) {
 
     // Group by City
     const city = p.tenant;
-    if (!cityGroup[city]) {
-      cityGroup[city] = { count: 0, approved: 0, rejected: 0, pending: 0, collection: 0, tax: 0 };
+    if (!cityGroup.has(city)) {
+      cityGroup.set(city, { count: 0, approved: 0, rejected: 0, pending: 0, collection: 0, tax: 0 });
     }
-    cityGroup[city].count++;
-    cityGroup[city].collection += col;
-    cityGroup[city].tax += tax;
-    if (status === 'approved') cityGroup[city].approved++;
-    else if (status === 'rejected') cityGroup[city].rejected++;
-    else if (status === 'pending') cityGroup[city].pending++;
+    const cData = cityGroup.get(city);
+    cData.count++;
+    cData.collection += col;
+    cData.tax += tax;
+    if (status === 'approved') cData.approved++;
+    else if (status === 'rejected') cData.rejected++;
+    else if (status === 'pending') cData.pending++;
 
     // Group by Type
     const type = p.property_type;
-    if (!typeGroup[type]) {
-      typeGroup[type] = { count: 0, collection: 0, tax: 0 };
+    if (!typeGroup.has(type)) {
+      typeGroup.set(type, { count: 0, collection: 0, tax: 0 });
     }
-    typeGroup[type].count++;
-    typeGroup[type].collection += col;
-    typeGroup[type].tax += tax;
+    const tData = typeGroup.get(type);
+    tData.count++;
+    tData.collection += col;
+    tData.tax += tax;
   });
 
   // Calculate efficiency per city
-  const cityMetrics = Object.keys(cityGroup).map(cityName => {
-    const data = cityGroup[cityName];
+  const cityMetrics = Array.from(cityGroup.keys()).map(cityName => {
+    const data = cityGroup.get(cityName);
     const efficiency = data.tax > 0 ? (data.collection / data.tax) * 100 : 0;
     return {
       cityName,
@@ -73,11 +75,12 @@ export function computeDataSummary(rawProperties) {
   // Sort by collection efficiency
   const sortedCities = [...cityMetrics].sort((a, b) => b.efficiency - a.efficiency);
   const topCity = sortedCities[0];
-  const lowestCity = sortedCities[sortedCities.length - 1];
+  // Safe array tail retrieval without bracket lookup
+  const lowestCity = sortedCities.slice(-1).pop();
 
   // Property Type summaries
-  const typeSummary = Object.keys(typeGroup).map(typeName => {
-    const data = typeGroup[typeName];
+  const typeSummary = Array.from(typeGroup.keys()).map(typeName => {
+    const data = typeGroup.get(typeName);
     const eff = data.tax > 0 ? (data.collection / data.tax) * 100 : 0;
     return {
       typeName,

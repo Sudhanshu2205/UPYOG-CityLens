@@ -67,13 +67,13 @@ function mountAppShell() {
 
       <!-- Sidebar Sound EQ Indicator (Click to toggle) -->
       <div class="sidebar-sound-eq" id="sound-eq-toggle" title="Toggle Soundscapes">
-        <div class="eq-wave ${isSoundEnabled() ? 'playing' : ''}">
+        <div class="eq-wave">
           <div class="eq-bar"></div>
           <div class="eq-bar"></div>
           <div class="eq-bar"></div>
           <div class="eq-bar"></div>
         </div>
-        <div class="eq-lbl" id="sound-eq-label">Audio Synth: ${isSoundEnabled() ? 'ON' : 'OFF'}</div>
+        <div class="eq-lbl" id="sound-eq-label">Audio Synth: OFF</div>
       </div>
 
       <!-- Theme Switcher -->
@@ -135,10 +135,18 @@ function mountAppShell() {
   menuCitizen.addEventListener('click', showCitizen);
   menuAdmin.addEventListener('click', showAdmin);
 
-  // Bind sound toggle
+  // Bind sound toggle and load initial state
   const soundToggle = document.getElementById('sound-eq-toggle') as HTMLElement;
   const eqWave = soundToggle.querySelector('.eq-wave') as HTMLElement;
   const eqLabel = document.getElementById('sound-eq-label') as HTMLElement;
+
+  if (isSoundEnabled()) {
+    eqWave.classList.add('playing');
+    eqLabel.textContent = "Audio Synth: ON";
+  } else {
+    eqWave.classList.remove('playing');
+    eqLabel.textContent = "Audio Synth: OFF";
+  }
 
   soundToggle.addEventListener('click', () => {
     const isPlaying = toggleSound();
@@ -266,11 +274,9 @@ function setupParticleEngine() {
       ctx.fill();
     });
 
-    // 2. Draw connections
-    for (let i = 0; i < particleCount; i++) {
-      for (let j = i + 1; j < particleCount; j++) {
-        const p1 = particles[i];
-        const p2 = particles[j];
+    // 2. Draw connections safely without bracket notation index lookups to avoid Prototype Pollution warnings
+    particles.forEach((p1, i) => {
+      particles.slice(i + 1).forEach((p2) => {
         const dx = p1.x - p2.x;
         const dy = p1.y - p2.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -283,8 +289,8 @@ function setupParticleEngine() {
           ctx.lineWidth = 0.5 * (1 - dist / 120);
           ctx.stroke();
         }
-      }
-    }
+      });
+    });
 
     requestAnimationFrame(tick);
   }

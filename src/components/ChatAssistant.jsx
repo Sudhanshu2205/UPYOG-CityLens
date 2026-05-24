@@ -3,6 +3,17 @@ import { MessageSquare, X, Send, Bot, User, Sparkles } from 'lucide-react';
 import { playClick, playTick, playChime } from '../soundEffects.ts';
 import { computeDataSummary, compileSystemPromptText } from '../utils/dataUtils.js';
 
+// Helper to safely render markdown bold tags inside JSX without using dangerouslySetInnerHTML
+const renderLineWithBold = (line) => {
+  const parts = line.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+};
+
 export default function ChatAssistant({ rawData }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
@@ -241,7 +252,7 @@ _CORS Notice: If you are looking to run arbitrary general chat conversations wit
                         return <p key={lIdx} className="pl-4 -indent-4 my-1">📍 {line.substring(line.indexOf('.') + 1).replace(/\*\*(.*?)\*\*/g, '$1')}</p>;
                       }
                       // Regular replacement of bold text
-                      return <p key={lIdx} className="my-1.5" dangerouslySetInnerHTML={{__html: line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}} />;
+                      return <p key={lIdx} className="my-1.5">{renderLineWithBold(line)}</p>;
                     })}
                   </div>
                 </div>

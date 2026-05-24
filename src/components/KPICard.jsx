@@ -55,7 +55,7 @@ export default function KPICard({ title, value, trendText, trendDirection, icon,
     }
   };
 
-  const scheme = colorSchemes[colorClass] || colorSchemes.saffron;
+  const scheme = Object.prototype.hasOwnProperty.call(colorSchemes, colorClass) ? colorSchemes[colorClass] : colorSchemes.saffron;
 
   if (loading) {
     return (

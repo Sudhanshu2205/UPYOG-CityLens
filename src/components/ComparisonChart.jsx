@@ -61,10 +61,10 @@ export default function ComparisonChart({ rawData, selectedTenant, onCitySelect 
     ? rawData
     : rawData.filter(p => p.tenant.toLowerCase() === selectedTenant.toLowerCase());
 
-  const typeCounts = {};
+  const typeCounts = new Map();
   activeProps.forEach(p => {
     const type = p.property_type || 'Other';
-    typeCounts[type] = (typeCounts[type] || 0) + 1;
+    typeCounts.set(type, (typeCounts.get(type) || 0) + 1);
   });
 
   const donutColors = {
@@ -76,10 +76,10 @@ export default function ComparisonChart({ rawData, selectedTenant, onCitySelect 
     'Other': 'hsl(215, 16%, 47%)'        // Muted Gray
   };
 
-  const donutData = Object.keys(typeCounts).map(type => ({
+  const donutData = Array.from(typeCounts.keys()).map(type => ({
     name: type,
-    value: typeCounts[type],
-    color: donutColors[type] || donutColors['Other']
+    value: typeCounts.get(type),
+    color: Object.prototype.hasOwnProperty.call(donutColors, type) ? donutColors[type] : donutColors['Other']
   }));
 
   // Custom tooltips matching our glassmorphism aesthetics

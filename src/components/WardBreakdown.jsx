@@ -2,21 +2,22 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export default function WardBreakdown({ properties, cityName }) {
-  // 1. Group data by ward for the active city's properties
-  const wardGroups = {};
+  // 1. Group data by ward using an ES6 Map to avoid prototype pollution
+  const wardGroups = new Map();
   properties.forEach(p => {
     const ward = p.ward || 'General Ward';
-    if (!wardGroups[ward]) {
-      wardGroups[ward] = { count: 0, collection: 0, tax: 0 };
+    if (!wardGroups.has(ward)) {
+      wardGroups.set(ward, { count: 0, collection: 0, tax: 0 });
     }
-    wardGroups[ward].count++;
-    wardGroups[ward].collection += p.collection_inr || 0;
-    wardGroups[ward].tax += p.annual_tax_inr || 0;
+    const current = wardGroups.get(ward);
+    current.count++;
+    current.collection += p.collection_inr || 0;
+    current.tax += p.annual_tax_inr || 0;
   });
 
-  // 2. Map and sort wards by efficiency or name
-  const wardChartData = Object.keys(wardGroups).map(wardName => {
-    const data = wardGroups[wardName];
+  // 2. Map and sort wards by name safely
+  const wardChartData = Array.from(wardGroups.keys()).map(wardName => {
+    const data = wardGroups.get(wardName);
     const efficiency = data.tax > 0 ? (data.collection / data.tax) * 100 : 0;
     return {
       ward: wardName,
