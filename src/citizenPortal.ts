@@ -347,21 +347,21 @@ function renderCheckoutStep(container: HTMLElement, amount: number, modal: HTMLE
         <!-- Inputs -->
         <form id="payment-card-form" class="checkout-inputs">
           <div class="form-group">
-            <label>Name on Card</label>
-            <input type="text" id="pay-name" placeholder="John Doe" autocomplete="off" required>
+            <label for="pay-name">Name on Card</label>
+            <input type="text" id="pay-name" name="pay-name" placeholder="John Doe" autocomplete="off" required>
           </div>
           <div class="form-group">
-            <label>Card Number</label>
-            <input type="text" id="pay-num" maxlength="19" placeholder="4111 2222 3333 4444" autocomplete="off" required>
+            <label for="pay-num">Card Number</label>
+            <input type="text" id="pay-num" name="pay-num" maxlength="19" placeholder="4111 2222 3333 4444" autocomplete="off" required>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Expiry Date</label>
-              <input type="text" id="pay-exp" placeholder="MM/YY" maxlength="5" autocomplete="off" required>
+              <label for="pay-exp">Expiry Date</label>
+              <input type="text" id="pay-exp" name="pay-exp" placeholder="MM/YY" maxlength="5" autocomplete="off" required>
             </div>
             <div class="form-group">
-              <label>CVV/CVC</label>
-              <input type="password" id="pay-cvv" placeholder="•••" maxlength="3" autocomplete="off" required>
+              <label for="pay-cvv">CVV/CVC</label>
+              <input type="password" id="pay-cvv" name="pay-cvv" placeholder="•••" maxlength="3" autocomplete="off" required>
             </div>
           </div>
           <button type="submit" class="submit-payment-btn pulse-glow">Complete Payment (₹${amount.toLocaleString('en-IN')})</button>
@@ -619,22 +619,22 @@ function renderWaterWizard(container: HTMLElement) {
           <h4>Step 1: Citizen Identity & Municipality Details</h4>
           <div class="form-row">
             <div class="form-group">
-              <label>Applicant Full Name</label>
-              <input type="text" id="wiz-name" value="${applicationData.name}" placeholder="Full Name" required>
+              <label for="wiz-name">Applicant Full Name</label>
+              <input type="text" id="wiz-name" name="wiz-name" value="${applicationData.name}" placeholder="Full Name" required>
             </div>
             <div class="form-group">
-              <label>Mobile Number</label>
-              <input type="tel" id="wiz-phone" value="${applicationData.phone}" placeholder="10 digit mobile" required>
+              <label for="wiz-phone">Mobile Number</label>
+              <input type="tel" id="wiz-phone" name="wiz-phone" value="${applicationData.phone}" placeholder="10 digit mobile" required>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Aadhaar Identity Card Number</label>
-              <input type="text" id="wiz-aadhaar" value="${applicationData.aadhaar}" placeholder="XXXX XXXX XXXX" required>
+              <label for="wiz-aadhaar">Aadhaar Identity Card Number</label>
+              <input type="text" id="wiz-aadhaar" name="wiz-aadhaar" value="${applicationData.aadhaar}" placeholder="XXXX XXXX XXXX" required>
             </div>
             <div class="form-group">
-              <label>Allocated Municipality (ULB)</label>
-              <select id="wiz-ulb" required>
+              <label for="wiz-ulb">Allocated Municipality (ULB)</label>
+              <select id="wiz-ulb" name="wiz-ulb" required>
                 <option value="Lucknow Municipal Corporation" ${applicationData.ulb.includes('Lucknow') ? 'selected' : ''}>Lucknow Municipal Corporation</option>
                 <option value="Varanasi Municipal Corporation" ${applicationData.ulb.includes('Varanasi') ? 'selected' : ''}>Varanasi Municipal Corporation</option>
                 <option value="Noida Authority" ${applicationData.ulb.includes('Noida') ? 'selected' : ''}>Noida Authority</option>
@@ -650,16 +650,16 @@ function renderWaterWizard(container: HTMLElement) {
           <h4>Step 2: Technical Pipeline Configuration</h4>
           <div class="form-row">
             <div class="form-group">
-              <label>Utility Use Category</label>
-              <select id="wiz-use" required>
+              <label for="wiz-use">Utility Use Category</label>
+              <select id="wiz-use" name="wiz-use" required>
                 <option value="residential" ${applicationData.useType === 'residential' ? 'selected' : ''}>Residential Domestic Grid</option>
                 <option value="commercial" ${applicationData.useType === 'commercial' ? 'selected' : ''}>Commercial / Complex Tap</option>
                 <option value="industrial" ${applicationData.useType === 'industrial' ? 'selected' : ''}>Heavy Industrial Allocation</option>
               </select>
             </div>
             <div class="form-group">
-              <label>Inflow Pipe Diameter (Inches)</label>
-              <select id="wiz-dia" required>
+              <label for="wiz-dia">Inflow Pipe Diameter (Inches)</label>
+              <select id="wiz-dia" name="wiz-dia" required>
                 <option value="0.5" ${applicationData.diameter === '0.5' ? 'selected' : ''}>0.5 inch (Standard household pressure)</option>
                 <option value="1.0" ${applicationData.diameter === '1.0' ? 'selected' : ''}>1.0 inch (High demand building / duplex)</option>
                 <option value="2.0" ${applicationData.diameter === '2.0' ? 'selected' : ''}>2.0 inch (Industrial flow volume)</option>
@@ -706,12 +706,12 @@ function renderWaterWizard(container: HTMLElement) {
           <p class="sub-desc">Please review your pipeline allocation details. Submitting registers your intent in the municipal database instantly.</p>
           
           <div class="summary-sheet glass">
-            <div class="sum-line"><span>Primary Nominee:</span><strong>${applicationData.name}</strong></div>
-            <div class="sum-line"><span>Mobile Linked:</span><span>${applicationData.phone}</span></div>
-            <div class="sum-line"><span>Aadhaar Identity:</span><span>${applicationData.aadhaar}</span></div>
-            <div class="sum-line"><span>Allocated Local Body:</span><strong>${applicationData.ulb}</strong></div>
-            <div class="sum-line"><span>Pipe Spec Volume:</span><span>${applicationData.diameter} Inch Inlet</span></div>
-            <div class="sum-line"><span>Tariff Category:</span><span>${applicationData.useType.toUpperCase()} RATE</span></div>
+            <div class="sum-line"><span>Primary Nominee:</span><strong>${escapeHtml(applicationData.name)}</strong></div>
+            <div class="sum-line"><span>Mobile Linked:</span><span>${escapeHtml(applicationData.phone)}</span></div>
+            <div class="sum-line"><span>Aadhaar Identity:</span><span>${escapeHtml(applicationData.aadhaar)}</span></div>
+            <div class="sum-line"><span>Allocated Local Body:</span><strong>${escapeHtml(applicationData.ulb)}</strong></div>
+            <div class="sum-line"><span>Pipe Spec Volume:</span><span>${escapeHtml(applicationData.diameter)} Inch Inlet</span></div>
+            <div class="sum-line"><span>Tariff Category:</span><span>${escapeHtml(applicationData.useType).toUpperCase()} RATE</span></div>
           </div>
         </div>
       `;
@@ -837,7 +837,7 @@ function renderWaterTracker(container: HTMLElement) {
     <div class="tracker-layout glass">
       <div class="tracker-header">
         <h3 class="gradient-text"><span class="section-badge active">Live Tracker</span>Water Grid Connection Status</h3>
-        <p class="section-desc">Track real-time digital and mechanical validation pipelines for the property of <strong>${activeWaterApplication.applicantName}</strong>.</p>
+        <p class="section-desc">Track real-time digital and mechanical validation pipelines for the property of <strong id="tracker-applicant-name"></strong>.</p>
         
         <div class="tracker-actions">
           <button id="cancel-connection-btn" class="danger-text-btn">Withdraw Application</button>
@@ -913,6 +913,12 @@ function renderWaterTracker(container: HTMLElement) {
     </div>
   `;
 
+  // Safely set applicant name via textContent (CWE-116 — avoid innerHTML injection)
+  const trackerNameEl = container.querySelector('#tracker-applicant-name') as HTMLElement;
+  if (trackerNameEl && activeWaterApplication) {
+    trackerNameEl.textContent = activeWaterApplication.applicantName;
+  }
+
   // Bind cancel action
   const cancelBtn = container.querySelector('#cancel-connection-btn') as HTMLButtonElement;
   cancelBtn.addEventListener('click', () => {
@@ -944,13 +950,13 @@ function renderPGR(container: HTMLElement) {
         <form id="pgr-form" class="dynamic-form">
           <div class="form-group">
             <label for="pgr-name">Reporter Name</label>
-            <input type="text" id="pgr-name" value="Amit Kumar" required>
+            <input type="text" id="pgr-name" name="pgr-name" value="Amit Kumar" required>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="pgr-category">Grievance Category</label>
-              <select id="pgr-category" required>
+              <select id="pgr-category" name="pgr-category" required>
                 <option value="Pothole Damage">Potholes / Broken Asphalt</option>
                 <option value="Streetlight Malfunction">Streetlight Malfunction</option>
                 <option value="Garbage Pile Up">Garbage Pile Up / Solid Waste</option>
@@ -960,7 +966,7 @@ function renderPGR(container: HTMLElement) {
             </div>
             <div class="form-group">
               <label for="pgr-ulb">Affected Municipality (ULB)</label>
-              <select id="pgr-ulb" required>
+              <select id="pgr-ulb" name="pgr-ulb" required>
                 <option value="Lucknow Municipal Corporation">Lucknow Municipal Corporation</option>
                 <option value="Varanasi Municipal Corporation">Varanasi Municipal Corporation</option>
                 <option value="Noida Authority">Noida Authority</option>
@@ -971,7 +977,7 @@ function renderPGR(container: HTMLElement) {
 
           <div class="form-group">
             <label for="pgr-desc">Describe Situation & Location Specifics</label>
-            <textarea id="pgr-desc" rows="3" placeholder="Identify nearby landmarks and severity of issue..." required></textarea>
+            <textarea id="pgr-desc" name="pgr-desc" rows="3" placeholder="Identify nearby landmarks and severity of issue..." required></textarea>
           </div>
 
           <!-- GPS Simulator -->
@@ -1039,17 +1045,54 @@ function renderPGR(container: HTMLElement) {
       const card = document.createElement('div');
       card.className = 'kanban-card glass anim-scale';
       card.setAttribute('draggable', 'true');
-      card.innerHTML = `
-        <div class="card-ref">${g.id} <span class="card-time">${g.submittedAt}</span></div>
-        <div class="card-cat">${g.category}</div>
-        <div class="card-desc">${g.description}</div>
-        <div class="card-reporter">👤 ${g.citizenName}</div>
-        <div class="card-ulb">🏢 ${g.ulb.split(' ')[0]}</div>
-        
-        <div class="card-actions">
-          ${g.status !== 'resolved' ? `<button class="card-prog-btn" data-id="${g.id}">Dispatch Step →</button>` : `<span class="res-check">🏆 Resolved</span>`}
-        </div>
-      `;
+      // Build kanban card using DOM to prevent XSS from user input (CWE-116)
+      const cardRef = document.createElement('div');
+      cardRef.className = 'card-ref';
+      const refText = document.createElement('span');
+      refText.textContent = g.id;
+      const cardTime = document.createElement('span');
+      cardTime.className = 'card-time';
+      cardTime.textContent = g.submittedAt;
+      cardRef.appendChild(refText);
+      cardRef.appendChild(cardTime);
+
+      const cardCat = document.createElement('div');
+      cardCat.className = 'card-cat';
+      cardCat.textContent = g.category;
+
+      const cardDesc = document.createElement('div');
+      cardDesc.className = 'card-desc';
+      cardDesc.textContent = g.description;
+
+      const cardReporter = document.createElement('div');
+      cardReporter.className = 'card-reporter';
+      cardReporter.textContent = `\u{1F464} ${g.citizenName}`;
+
+      const cardUlb = document.createElement('div');
+      cardUlb.className = 'card-ulb';
+      cardUlb.textContent = `\u{1F3E2} ${g.ulb.split(' ')[0]}`;
+
+      const cardActions = document.createElement('div');
+      cardActions.className = 'card-actions';
+      if (g.status !== 'resolved') {
+        const progBtn = document.createElement('button');
+        progBtn.className = 'card-prog-btn';
+        progBtn.dataset.id = g.id;
+        progBtn.textContent = 'Dispatch Step \u2192';
+        cardActions.appendChild(progBtn);
+      } else {
+        const resCheck = document.createElement('span');
+        resCheck.className = 'res-check';
+        resCheck.textContent = '\u{1F3C6} Resolved';
+        cardActions.appendChild(resCheck);
+      }
+
+      card.appendChild(cardRef);
+      card.appendChild(cardCat);
+      card.appendChild(cardDesc);
+      card.appendChild(cardReporter);
+      card.appendChild(cardUlb);
+      card.appendChild(cardActions);
 
       card.addEventListener('dragstart', (e: any) => {
         e.dataTransfer.setData('text/plain', g.id);
@@ -1175,7 +1218,7 @@ function renderDocumentVault(container: HTMLElement) {
         <form id="vault-form" class="dynamic-form">
           <div class="form-group">
             <label for="vault-doc-type">Certificate Type</label>
-            <select id="vault-doc-type" required>
+            <select id="vault-doc-type" name="vault-doc-type" required>
               <option value="birth">Certificate of Birth (Form-5)</option>
               <option value="death">Certificate of Death (Form-6)</option>
               <option value="trade">Municipal Trade & Commerce License</option>
@@ -1185,22 +1228,22 @@ function renderDocumentVault(container: HTMLElement) {
           <div class="form-row">
             <div class="form-group">
               <label for="vault-name">Full Legal Name</label>
-              <input type="text" id="vault-name" value="Amit Kumar Sharma" placeholder="As registered in official records" required>
+              <input type="text" id="vault-name" name="vault-name" value="Amit Kumar Sharma" placeholder="As registered in official records" required>
             </div>
             <div class="form-group">
               <label for="vault-date">Event / Establishment Date</label>
-              <input type="date" id="vault-date" value="1992-06-15" required>
+              <input type="date" id="vault-date" name="vault-date" value="1992-06-15" required>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="vault-location">Location of Event / ULB</label>
-              <input type="text" id="vault-location" value="Lucknow, Uttar Pradesh" placeholder="Hospital or Registered Ward" required>
+              <input type="text" id="vault-location" name="vault-location" value="Lucknow, Uttar Pradesh" placeholder="Hospital or Registered Ward" required>
             </div>
             <div class="form-group">
               <label for="vault-parent">Parent / Proprietor Name</label>
-              <input type="text" id="vault-parent" value="Ram Sharan Sharma" placeholder="Father/Mother/Owner Name" required>
+              <input type="text" id="vault-parent" name="vault-parent" value="Ram Sharan Sharma" placeholder="Father/Mother/Owner Name" required>
             </div>
           </div>
 
@@ -1250,41 +1293,48 @@ function renderDocumentVault(container: HTMLElement) {
       year: 'numeric'
     });
 
+    // Escape user inputs before inserting into innerHTML (CWE-116)
+    const safeName = escapeHtml(name);
+    const safeLoc = escapeHtml(loc);
+    const safeParentName = escapeHtml(parentName);
+    const safeCertId = escapeHtml(certId);
+    const safeFormattedDate = escapeHtml(formattedDate);
+
     // Create printable HTML template
     let certTitle = "CERTIFICATE OF BIRTH";
     let subRule = "ISSUED UNDER SECTION 12/17 OF THE REGISTRATION OF BIRTHS & DEATHS ACT, 1969";
     let bodyText = `This is to certify that the following information has been taken from the original record of birth which is the register for municipal district local body area.`;
     
     let gridDetails = `
-      <div class="c-line"><span>Name:</span><strong>${name.toUpperCase()}</strong></div>
+      <div class="c-line"><span>Name:</span><strong>${safeName.toUpperCase()}</strong></div>
       <div class="c-line"><span>Sex/Gender:</span><span>MALE</span></div>
-      <div class="c-line"><span>Date of Birth:</span><strong>${formattedDate}</strong></div>
-      <div class="c-line"><span>Place of Birth:</span><span>${loc}</span></div>
-      <div class="c-line"><span>Name of Father:</span><span>${parentName}</span></div>
-      <div class="c-line"><span>Registration No:</span><strong>${certId}</strong></div>
+      <div class="c-line"><span>Date of Birth:</span><strong>${safeFormattedDate}</strong></div>
+      <div class="c-line"><span>Place of Birth:</span><span>${safeLoc}</span></div>
+      <div class="c-line"><span>Name of Father:</span><span>${safeParentName}</span></div>
+      <div class="c-line"><span>Registration No:</span><strong>${safeCertId}</strong></div>
     `;
 
     if (type === 'death') {
       certTitle = "CERTIFICATE OF DEATH";
-      subRule = "ISSUED UNDER SECTION 12/17 OF THE REGISTRATION OF BIRTHS & DEATHS ACT, 1969";
+      subRule = "ISSUED UNDER SECTION 12/17 OF THE REGISTRATION OF BIRTHS &amp; DEATHS ACT, 1969";
       bodyText = `This is to certify that the following information has been taken from the official register of deaths in the records of the Urban Local Body.`;
       gridDetails = `
-        <div class="c-line"><span>Deceased Name:</span><strong>${name.toUpperCase()}</strong></div>
-        <div class="c-line"><span>Date of Decease:</span><strong>${formattedDate}</strong></div>
-        <div class="c-line"><span>Place of Event:</span><span>${loc}</span></div>
-        <div class="c-line"><span>Guardian/Relative Name:</span><span>${parentName}</span></div>
-        <div class="c-line"><span>Registration No:</span><strong>${certId}</strong></div>
+        <div class="c-line"><span>Deceased Name:</span><strong>${safeName.toUpperCase()}</strong></div>
+        <div class="c-line"><span>Date of Decease:</span><strong>${safeFormattedDate}</strong></div>
+        <div class="c-line"><span>Place of Event:</span><span>${safeLoc}</span></div>
+        <div class="c-line"><span>Guardian/Relative Name:</span><span>${safeParentName}</span></div>
+        <div class="c-line"><span>Registration No:</span><strong>${safeCertId}</strong></div>
       `;
     } else if (type === 'trade') {
       certTitle = "MUNICIPAL TRADE LICENSE";
       subRule = "ISSUED UNDER SECTION 443 OF THE MUNICIPAL CORPORATION ACT, 1959";
       bodyText = `This license authorizes the enterprise detailed below to operate commercial trade operations within the geographical municipal bounds of the ULB.`;
       gridDetails = `
-        <div class="c-line"><span>Proprietor Name:</span><strong>${parentName.toUpperCase()}</strong></div>
-        <div class="c-line"><span>Trade/Enterprise Name:</span><strong>${name.toUpperCase()}</strong></div>
-        <div class="c-line"><span>Commencement Date:</span><strong>${formattedDate}</strong></div>
-        <div class="c-line"><span>Registered Premises:</span><span>${loc}</span></div>
-        <div class="c-line"><span>License Number:</span><strong>${certId}</strong></div>
+        <div class="c-line"><span>Proprietor Name:</span><strong>${safeParentName.toUpperCase()}</strong></div>
+        <div class="c-line"><span>Trade/Enterprise Name:</span><strong>${safeName.toUpperCase()}</strong></div>
+        <div class="c-line"><span>Commencement Date:</span><strong>${safeFormattedDate}</strong></div>
+        <div class="c-line"><span>Registered Premises:</span><span>${safeLoc}</span></div>
+        <div class="c-line"><span>License Number:</span><strong>${safeCertId}</strong></div>
       `;
     }
 
@@ -1388,6 +1438,14 @@ function renderDocumentVault(container: HTMLElement) {
 }
 
 // Helpers
+
+// Escape user-supplied text before inserting into innerHTML templates (CWE-116)
+function escapeHtml(text: string): string {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
 function triggerScreenConfetti() {
   // Spawn decorative falling confetti particles in vanilla CSS
   const colors = ['#f97316', '#a855f7', '#10b981', '#3b82f6', '#facc15'];

@@ -109,8 +109,8 @@ export function renderAdminDashboard(container: HTMLElement) {
             </div>
             
             <div class="filter-group">
-              <label for="admin-ulb-filter">ULB Filters:</label>
-              <select id="admin-ulb-filter" class="glass-select">
+              <label for="admin-ulb-filter" id="admin-ulb-filter-label">ULB Filters:</label>
+              <select id="admin-ulb-filter" name="admin-ulb-filter" aria-labelledby="admin-ulb-filter-label" class="glass-select">
                 <option value="all">Consolidated Central Data</option>
                 <option value="Lucknow">Lucknow Municipality Only</option>
                 <option value="Noida">Noida Authority Only</option>
@@ -149,7 +149,8 @@ export function renderAdminDashboard(container: HTMLElement) {
             <h3>Urban Local Bodies (ULB) Performance Index</h3>
             <p class="section-desc">Comparison chart indexing grievance response rates, connection numbers, and overall municipal health rankings.</p>
           </div>
-          <input type="text" id="leaderboard-search" class="table-search" placeholder="Search municipalities...">
+          <label for="leaderboard-search" class="sr-only">Search municipalities</label>
+          <input type="text" id="leaderboard-search" name="leaderboard-search" class="table-search" placeholder="Search municipalities...">
         </div>
 
         <div class="table-responsive">
@@ -409,11 +410,15 @@ function renderLeaderboardTable(container: HTMLElement) {
     );
 
     // Sort
-    items.sort((a: any, b: any) => {
-      let valA = a[currentSortColumn];
-      let valB = b[currentSortColumn];
+    // Whitelist for sort columns to prevent prototype pollution (CWE-94)
+    const VALID_SORT_COLS: string[] = ['rank', 'name', 'efficiencyScore', 'revenueCr', 'connectionCount', 'grievancesPercent'];
+    const safeSort = VALID_SORT_COLS.includes(currentSortColumn) ? currentSortColumn : 'rank';
 
-      if (currentSortColumn === 'grievancesPercent') {
+    items.sort((a: any, b: any) => {
+      let valA = safeSort === 'grievancesPercent' ? 0 : a[safeSort];
+      let valB = safeSort === 'grievancesPercent' ? 0 : b[safeSort];
+
+      if (safeSort === 'grievancesPercent') {
         valA = a.grievancesResolved / a.grievancesTotal;
         valB = b.grievancesResolved / b.grievancesTotal;
       }
@@ -429,24 +434,58 @@ function renderLeaderboardTable(container: HTMLElement) {
       const gRate = ((r.grievancesResolved / r.grievancesTotal) * 100).toFixed(1);
       const row = document.createElement('tr');
       row.className = "table-row-item";
-      row.innerHTML = `
-        <td><strong>#${r.rank}</strong></td>
-        <td><strong>${r.name}</strong></td>
-        <td>
-          <div class="table-efficiency-wrapper">
-            <span class="eff-badge ${r.efficiencyScore >= 90 ? 'green' : 'orange'}">${r.efficiencyScore}%</span>
-            <div class="sparkline-bar"><div class="fill" style="width: ${r.efficiencyScore}%;"></div></div>
-          </div>
-        </td>
-        <td>₹${r.revenueCr} Cr</td>
-        <td>${r.connectionCount.toLocaleString()}</td>
-        <td>
-          <div class="col-grievance">
-            <strong>${gRate}%</strong>
-            <span>${r.grievancesResolved}/${r.grievancesTotal} closed</span>
-          </div>
-        </td>
-      `;
+
+      // Build cells using DOM to avoid innerHTML injection (CWE-116 / CWE-94)
+      const tdRank = document.createElement('td');
+      const rankStrong = document.createElement('strong');
+      rankStrong.textContent = `#${r.rank}`;
+      tdRank.appendChild(rankStrong);
+
+      const tdName = document.createElement('td');
+      const nameStrong = document.createElement('strong');
+      nameStrong.textContent = r.name;
+      tdName.appendChild(nameStrong);
+
+      const tdEff = document.createElement('td');
+      const effWrap = document.createElement('div');
+      effWrap.className = 'table-efficiency-wrapper';
+      const effBadge = document.createElement('span');
+      effBadge.className = `eff-badge ${r.efficiencyScore >= 90 ? 'green' : 'orange'}`;
+      effBadge.textContent = `${r.efficiencyScore}%`;
+      const sparkBar = document.createElement('div');
+      sparkBar.className = 'sparkline-bar';
+      const sparkFill = document.createElement('div');
+      sparkFill.className = 'fill';
+      sparkFill.style.width = `${Math.min(100, Math.max(0, r.efficiencyScore))}%`;
+      sparkBar.appendChild(sparkFill);
+      effWrap.appendChild(effBadge);
+      effWrap.appendChild(sparkBar);
+      tdEff.appendChild(effWrap);
+
+      const tdRev = document.createElement('td');
+      tdRev.textContent = `₹${r.revenueCr} Cr`;
+
+      const tdConn = document.createElement('td');
+      tdConn.textContent = r.connectionCount.toLocaleString();
+
+      const tdGrv = document.createElement('td');
+      const grvDiv = document.createElement('div');
+      grvDiv.className = 'col-grievance';
+      const grvStrong = document.createElement('strong');
+      grvStrong.textContent = `${gRate}%`;
+      const grvSpan = document.createElement('span');
+      grvSpan.textContent = `${r.grievancesResolved}/${r.grievancesTotal} closed`;
+      grvDiv.appendChild(grvStrong);
+      grvDiv.appendChild(grvSpan);
+      tdGrv.appendChild(grvDiv);
+
+      row.appendChild(tdRank);
+      row.appendChild(tdName);
+      row.appendChild(tdEff);
+      row.appendChild(tdRev);
+      row.appendChild(tdConn);
+      row.appendChild(tdGrv);
+
       tbody.appendChild(row);
     });
   };
@@ -486,15 +525,7 @@ function setupLiveTicker(container: HTMLElement) {
   // Insert initial items
   const count = 5;
   for (let i = 0; i < count; i++) {
-    const item = document.createElement('div');
-    item.className = 'ticker-node glass anim-slide';
-    item.innerHTML = `
-      <div class="node-badge-tick saffron">LEDGER</div>
-      <div class="node-body">
-        <p>${transactionsPool[Math.floor(Math.random() * transactionsPool.length)]}</p>
-        <span class="time-stamp">${Math.floor(i * 2 + 1)} mins ago</span>
-      </div>
-    `;
+    const item = createTickerNode('saffron', 'LEDGER', transactionsPool[Math.floor(Math.random() * transactionsPool.length)], `${Math.floor(i * 2 + 1)} mins ago`);
     ticker.appendChild(item);
   }
 
@@ -503,15 +534,7 @@ function setupLiveTicker(container: HTMLElement) {
 
   tickerTimer = window.setInterval(() => {
     const freshLog = transactionsPool[Math.floor(Math.random() * transactionsPool.length)];
-    const node = document.createElement('div');
-    node.className = 'ticker-node glass anim-slide';
-    node.innerHTML = `
-      <div class="node-badge-tick new-pulse">LIVE</div>
-      <div class="node-body">
-        <p>${freshLog}</p>
-        <span class="time-stamp">Just now</span>
-      </div>
-    `;
+    const node = createTickerNode('new-pulse', 'LIVE', freshLog, 'Just now');
 
     playTick();
     ticker.insertBefore(node, ticker.firstChild);
@@ -521,4 +544,31 @@ function setupLiveTicker(container: HTMLElement) {
       ticker.removeChild(ticker.lastChild!);
     }
   }, 6000); // Trigger logs every 6 seconds
+}
+
+// Safe DOM builder for ticker node items — avoids innerHTML template literal injection (CWE-116)
+function createTickerNode(badgeClass: string, badgeText: string, message: string, timeLabel: string): HTMLDivElement {
+  const item = document.createElement('div');
+  item.className = 'ticker-node glass anim-slide';
+
+  const badge = document.createElement('div');
+  badge.className = `node-badge-tick ${badgeClass}`;
+  badge.textContent = badgeText;
+
+  const body = document.createElement('div');
+  body.className = 'node-body';
+
+  const p = document.createElement('p');
+  p.textContent = message;
+
+  const time = document.createElement('span');
+  time.className = 'time-stamp';
+  time.textContent = timeLabel;
+
+  body.appendChild(p);
+  body.appendChild(time);
+  item.appendChild(badge);
+  item.appendChild(body);
+
+  return item;
 }
