@@ -603,8 +603,19 @@ function renderWaterWizard(container: HTMLElement) {
     if (currentStep === 1) prevBtn.classList.add('hidden');
     else prevBtn.classList.remove('hidden');
 
-    if (currentStep === 4) nextBtn.innerHTML = `Submit Application <span class="btn-icon">✓</span>`;
-    else nextBtn.innerHTML = `Next <span class="btn-icon">→</span>`;
+    if (currentStep === 4) {
+      nextBtn.textContent = 'Submit Application ';
+      const checkIcon = document.createElement('span');
+      checkIcon.className = 'btn-icon';
+      checkIcon.textContent = '✓';
+      nextBtn.appendChild(checkIcon);
+    } else {
+      nextBtn.textContent = 'Next ';
+      const arrowIcon = document.createElement('span');
+      arrowIcon.className = 'btn-icon';
+      arrowIcon.textContent = '→';
+      nextBtn.appendChild(arrowIcon);
+    }
 
     // Highlight Dots
     dots.forEach((dot, idx) => {
@@ -816,14 +827,25 @@ function triggerWaterSimulation(container: HTMLElement) {
         // Show a completion banner
         const footerInfo = container.querySelector('.tracker-footer') as HTMLElement;
         if (footerInfo) {
-          footerInfo.innerHTML = `
-            <div class="completion-banner glass">
-              <span class="comp-icon">🎉</span>
-              <div>
-                <strong>Pipeline Operational!</strong> Water connection is live and recorded in the municipal telemetry database. Meter reference: <strong>MTR-90028</strong>.
-              </div>
-            </div>
-          `;
+        // Build completion banner via DOM to avoid static innerHTML (CWE-116)
+        const banner = document.createElement('div');
+        banner.className = 'completion-banner glass';
+        const bannerIcon = document.createElement('span');
+        bannerIcon.className = 'comp-icon';
+        bannerIcon.textContent = '🎉';
+        const bannerBody = document.createElement('div');
+        const bannerStrong = document.createElement('strong');
+        bannerStrong.textContent = 'Pipeline Operational!';
+        bannerBody.appendChild(bannerStrong);
+        bannerBody.appendChild(document.createTextNode(' Water connection is live and recorded in the municipal telemetry database. Meter reference: '));
+        const mtrStrong = document.createElement('strong');
+        mtrStrong.textContent = 'MTR-90028';
+        bannerBody.appendChild(mtrStrong);
+        bannerBody.appendChild(document.createTextNode('.'));
+        banner.appendChild(bannerIcon);
+        banner.appendChild(bannerBody);
+        footerInfo.textContent = '';
+        footerInfo.appendChild(banner);
         }
       }
     }
@@ -1300,114 +1322,183 @@ function renderDocumentVault(container: HTMLElement) {
     const safeCertId = escapeHtml(certId);
     const safeFormattedDate = escapeHtml(formattedDate);
 
-    // Create printable HTML template
-    let certTitle = "CERTIFICATE OF BIRTH";
-    let subRule = "ISSUED UNDER SECTION 12/17 OF THE REGISTRATION OF BIRTHS & DEATHS ACT, 1969";
-    let bodyText = `This is to certify that the following information has been taken from the original record of birth which is the register for municipal district local body area.`;
-    
-    let gridDetails = `
-      <div class="c-line"><span>Name:</span><strong>${safeName.toUpperCase()}</strong></div>
-      <div class="c-line"><span>Sex/Gender:</span><span>MALE</span></div>
-      <div class="c-line"><span>Date of Birth:</span><strong>${safeFormattedDate}</strong></div>
-      <div class="c-line"><span>Place of Birth:</span><span>${safeLoc}</span></div>
-      <div class="c-line"><span>Name of Father:</span><span>${safeParentName}</span></div>
-      <div class="c-line"><span>Registration No:</span><strong>${safeCertId}</strong></div>
-    `;
+    // Build certificate field data as typed arrays — all values set via textContent (CWE-79/CWE-116 fix)
+    // [label, value, isBold]
+    let certTitle = 'CERTIFICATE OF BIRTH';
+    let subRule = 'ISSUED UNDER SECTION 12/17 OF THE REGISTRATION OF BIRTHS & DEATHS ACT, 1969';
+    let bodyText = 'This is to certify that the following information has been taken from the original record of birth which is the register for municipal district local body area.';
+    let gridLineEntries: [string, string, boolean][] = [
+      ['Name:', safeName.toUpperCase(), true],
+      ['Sex/Gender:', 'MALE', false],
+      ['Date of Birth:', safeFormattedDate, true],
+      ['Place of Birth:', safeLoc, false],
+      ['Name of Father:', safeParentName, false],
+      ['Registration No:', safeCertId, true]
+    ];
 
     if (type === 'death') {
-      certTitle = "CERTIFICATE OF DEATH";
-      subRule = "ISSUED UNDER SECTION 12/17 OF THE REGISTRATION OF BIRTHS &amp; DEATHS ACT, 1969";
-      bodyText = `This is to certify that the following information has been taken from the official register of deaths in the records of the Urban Local Body.`;
-      gridDetails = `
-        <div class="c-line"><span>Deceased Name:</span><strong>${safeName.toUpperCase()}</strong></div>
-        <div class="c-line"><span>Date of Decease:</span><strong>${safeFormattedDate}</strong></div>
-        <div class="c-line"><span>Place of Event:</span><span>${safeLoc}</span></div>
-        <div class="c-line"><span>Guardian/Relative Name:</span><span>${safeParentName}</span></div>
-        <div class="c-line"><span>Registration No:</span><strong>${safeCertId}</strong></div>
-      `;
+      certTitle = 'CERTIFICATE OF DEATH';
+      subRule = 'ISSUED UNDER SECTION 12/17 OF THE REGISTRATION OF BIRTHS & DEATHS ACT, 1969';
+      bodyText = 'This is to certify that the following information has been taken from the official register of deaths in the records of the Urban Local Body.';
+      gridLineEntries = [
+        ['Deceased Name:', safeName.toUpperCase(), true],
+        ['Date of Decease:', safeFormattedDate, true],
+        ['Place of Event:', safeLoc, false],
+        ['Guardian/Relative Name:', safeParentName, false],
+        ['Registration No:', safeCertId, true]
+      ];
     } else if (type === 'trade') {
-      certTitle = "MUNICIPAL TRADE LICENSE";
-      subRule = "ISSUED UNDER SECTION 443 OF THE MUNICIPAL CORPORATION ACT, 1959";
-      bodyText = `This license authorizes the enterprise detailed below to operate commercial trade operations within the geographical municipal bounds of the ULB.`;
-      gridDetails = `
-        <div class="c-line"><span>Proprietor Name:</span><strong>${safeParentName.toUpperCase()}</strong></div>
-        <div class="c-line"><span>Trade/Enterprise Name:</span><strong>${safeName.toUpperCase()}</strong></div>
-        <div class="c-line"><span>Commencement Date:</span><strong>${safeFormattedDate}</strong></div>
-        <div class="c-line"><span>Registered Premises:</span><span>${safeLoc}</span></div>
-        <div class="c-line"><span>License Number:</span><strong>${safeCertId}</strong></div>
-      `;
+      certTitle = 'MUNICIPAL TRADE LICENSE';
+      subRule = 'ISSUED UNDER SECTION 443 OF THE MUNICIPAL CORPORATION ACT, 1959';
+      bodyText = 'This license authorizes the enterprise detailed below to operate commercial trade operations within the geographical municipal bounds of the ULB.';
+      gridLineEntries = [
+        ['Proprietor Name:', safeParentName.toUpperCase(), true],
+        ['Trade/Enterprise Name:', safeName.toUpperCase(), true],
+        ['Commencement Date:', safeFormattedDate, true],
+        ['Registered Premises:', safeLoc, false],
+        ['License Number:', safeCertId, true]
+      ];
     }
 
-    // Functioning QR verification link
+    // Functioning QR verification link (URL uses encodeURIComponent — safe)
     const verificationUrl = `https://upyog.gov.in/verify?id=${certId}&type=${type}&name=${encodeURIComponent(name)}`;
 
-    renderTarget.innerHTML = `
-      <div class="official-certificate-sheet printable-area">
-        <!-- Ashoka Watermark backdrop -->
-        <div class="cert-watermark">UPYOG</div>
+    // Build certificate via DOM API — no innerHTML with user data (CWE-79/CWE-116 fix)
+    renderTarget.textContent = '';
+    const sheet = document.createElement('div');
+    sheet.className = 'official-certificate-sheet printable-area';
 
-        <!-- Classic Triple Border -->
-        <div class="cert-border-outer">
-          <div class="cert-border-inner">
-            
-            <!-- Government Headers -->
-            <div class="cert-header">
-              <div class="national-emblem-svg">
-                <!-- Ashoka Chakra SVG Mock -->
-                <svg viewBox="0 0 100 100" width="45" height="45">
-                  <circle cx="50" cy="50" r="45" fill="none" stroke="#b45309" stroke-width="2"/>
-                  <circle cx="50" cy="50" r="10" fill="none" stroke="#2563eb" stroke-width="1.5"/>
-                  <path d="M50 5 v90 M5 50 h90 M18 18 l64 64 M18 82 l64 -64 M32 10 l36 80 M10 32 l80 36 M10 68 l80 -36 M32 90 l36 -80" stroke="#2563eb" stroke-width="0.75"/>
-                </svg>
-              </div>
-              <h2>MINISTRY OF URBAN DEVELOPMENT & E-GOVERNANCE</h2>
-              <h3>GOVERNMENT OF INDIA</h3>
-              <div class="cert-title-badge">${certTitle}</div>
-              <p class="cert-law-rule">${subRule}</p>
-            </div>
+    const watermark = document.createElement('div');
+    watermark.className = 'cert-watermark';
+    watermark.textContent = 'UPYOG';
+    sheet.appendChild(watermark);
 
-            <p class="cert-body-intro">${bodyText}</p>
+    const borderOuter = document.createElement('div');
+    borderOuter.className = 'cert-border-outer';
+    const borderInner = document.createElement('div');
+    borderInner.className = 'cert-border-inner';
+    borderOuter.appendChild(borderInner);
+    sheet.appendChild(borderOuter);
 
-            <!-- Details Block -->
-            <div class="cert-grid">
-              ${gridDetails}
-            </div>
+    // Header
+    const certHeader = document.createElement('div');
+    certHeader.className = 'cert-header';
+    const emblumDiv = document.createElement('div');
+    emblumDiv.className = 'national-emblem-svg';
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svgEl = document.createElementNS(svgNS, 'svg');
+    svgEl.setAttribute('viewBox', '0 0 100 100');
+    svgEl.setAttribute('width', '45'); svgEl.setAttribute('height', '45');
+    const mkCircle = (cx: string, cy: string, r: string, stroke: string, sw: string) => {
+      const c = document.createElementNS(svgNS, 'circle');
+      c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', r);
+      c.setAttribute('fill', 'none'); c.setAttribute('stroke', stroke); c.setAttribute('stroke-width', sw);
+      return c;
+    };
+    svgEl.appendChild(mkCircle('50', '50', '45', '#b45309', '2'));
+    svgEl.appendChild(mkCircle('50', '50', '10', '#2563eb', '1.5'));
+    const svgPath = document.createElementNS(svgNS, 'path');
+    svgPath.setAttribute('d', 'M50 5 v90 M5 50 h90 M18 18 l64 64 M18 82 l64 -64 M32 10 l36 80 M10 32 l80 36 M10 68 l80 -36 M32 90 l36 -80');
+    svgPath.setAttribute('stroke', '#2563eb'); svgPath.setAttribute('stroke-width', '0.75');
+    svgEl.appendChild(svgPath);
+    emblumDiv.appendChild(svgEl);
+    certHeader.appendChild(emblumDiv);
 
-            <!-- Validation row with digital seal and working QR -->
-            <div class="cert-footer">
-              <div class="qr-block" title="Scan to verify or click to open.">
-                <!-- Direct clickable QR for mock verification -->
-                <a href="${verificationUrl}" target="_blank" class="qr-anchor">
-                  <svg viewBox="0 0 100 100" width="70" height="70">
-                    <rect x="0" y="0" width="100" height="100" fill="#fff" stroke="#000" stroke-width="2"/>
-                    <rect x="5" y="5" width="25" height="25" fill="#000"/>
-                    <rect x="70" y="5" width="25" height="25" fill="#000"/>
-                    <rect x="5" y="70" width="25" height="25" fill="#000"/>
-                    <rect x="10" y="10" width="15" height="15" fill="#fff"/>
-                    <rect x="75" y="10" width="15" height="15" fill="#fff"/>
-                    <rect x="10" y="75" width="15" height="15" fill="#fff"/>
-                    <path d="M35 15h10v5H35z M55 10h10v5H55z M45 45h15v5H45z M15 35h5v20h-5z M75 35h15v5H75z M35 75h10v10H35z M80 80h10v10H80z" fill="#000"/>
-                  </svg>
-                </a>
-                <span class="qr-lbl">Tap / Scan Card QR<br>to Verify Online</span>
-              </div>
+    const h2El = document.createElement('h2');
+    h2El.textContent = 'MINISTRY OF URBAN DEVELOPMENT & E-GOVERNANCE';
+    const h3El = document.createElement('h3');
+    h3El.textContent = 'GOVERNMENT OF INDIA';
+    const titleBadge = document.createElement('div');
+    titleBadge.className = 'cert-title-badge';
+    titleBadge.textContent = certTitle;
+    const lawRule = document.createElement('p');
+    lawRule.className = 'cert-law-rule';
+    lawRule.textContent = subRule;
+    certHeader.appendChild(h2El); certHeader.appendChild(h3El);
+    certHeader.appendChild(titleBadge); certHeader.appendChild(lawRule);
+    borderInner.appendChild(certHeader);
 
-              <div class="seal-block">
-                <div class="seal-stamp">
-                  <span>UPYOG DIGITAL SEAL</span>
-                </div>
-              </div>
+    const bodyIntro = document.createElement('p');
+    bodyIntro.className = 'cert-body-intro';
+    bodyIntro.textContent = bodyText;
+    borderInner.appendChild(bodyIntro);
 
-              <div class="signature-block">
-                <div class="sig-line">Digital Seal Registered</div>
-                <div class="sig-title">REGISTRAR OF EVENTS (ULB)</div>
-              </div>
-            </div>
+    // Details grid — built from typed array, all textContent
+    const certGrid = document.createElement('div');
+    certGrid.className = 'cert-grid';
+    gridLineEntries.forEach(([label, value, isBold]) => {
+      const line = document.createElement('div');
+      line.className = 'c-line';
+      const labelSpan = document.createElement('span');
+      labelSpan.textContent = label;
+      const valueEl = isBold ? document.createElement('strong') : document.createElement('span');
+      valueEl.textContent = value;
+      line.appendChild(labelSpan);
+      line.appendChild(valueEl);
+      certGrid.appendChild(line);
+    });
+    borderInner.appendChild(certGrid);
 
-          </div>
-        </div>
-      </div>
-    `;
+    // Footer: QR + Seal + Signature
+    const certFooterEl = document.createElement('div');
+    certFooterEl.className = 'cert-footer';
+
+    const qrBlock = document.createElement('div');
+    qrBlock.className = 'qr-block';
+    qrBlock.title = 'Scan to verify or click to open.';
+    const qrAnchor = document.createElement('a');
+    qrAnchor.setAttribute('href', verificationUrl);
+    qrAnchor.target = '_blank';
+    qrAnchor.rel = 'noopener noreferrer';
+    qrAnchor.className = 'qr-anchor';
+    const qrSvg = document.createElementNS(svgNS, 'svg');
+    qrSvg.setAttribute('viewBox', '0 0 100 100');
+    qrSvg.setAttribute('width', '70'); qrSvg.setAttribute('height', '70');
+    const mkRect = (x: string, y: string, w: string, h: string, fill: string) => {
+      const r = document.createElementNS(svgNS, 'rect');
+      r.setAttribute('x', x); r.setAttribute('y', y); r.setAttribute('width', w); r.setAttribute('height', h); r.setAttribute('fill', fill);
+      return r;
+    };
+    qrSvg.appendChild(mkRect('0','0','100','100','#fff'));
+    const qrStroke = document.createElementNS(svgNS, 'rect');
+    qrStroke.setAttribute('x','0'); qrStroke.setAttribute('y','0'); qrStroke.setAttribute('width','100'); qrStroke.setAttribute('height','100');
+    qrStroke.setAttribute('fill','none'); qrStroke.setAttribute('stroke','#000'); qrStroke.setAttribute('stroke-width','2');
+    qrSvg.appendChild(qrStroke);
+    [['5','5','25','25','#000'],['70','5','25','25','#000'],['5','70','25','25','#000'],
+     ['10','10','15','15','#fff'],['75','10','15','15','#fff'],['10','75','15','15','#fff']].forEach(
+      ([x,y,w,h,f]) => qrSvg.appendChild(mkRect(x,y,w,h,f))
+    );
+    const qrPth = document.createElementNS(svgNS, 'path');
+    qrPth.setAttribute('d', 'M35 15h10v5H35z M55 10h10v5H55z M45 45h15v5H45z M15 35h5v20h-5z M75 35h15v5H75z M35 75h10v10H35z M80 80h10v10H80z');
+    qrPth.setAttribute('fill', '#000');
+    qrSvg.appendChild(qrPth);
+    qrAnchor.appendChild(qrSvg);
+    const qrLabel = document.createElement('span');
+    qrLabel.className = 'qr-lbl';
+    qrLabel.textContent = 'Tap / Scan Card QR to Verify Online';
+    qrBlock.appendChild(qrAnchor); qrBlock.appendChild(qrLabel);
+    certFooterEl.appendChild(qrBlock);
+
+    const sealBlock = document.createElement('div');
+    sealBlock.className = 'seal-block';
+    const sealStamp = document.createElement('div');
+    sealStamp.className = 'seal-stamp';
+    const sealSpan = document.createElement('span');
+    sealSpan.textContent = 'UPYOG DIGITAL SEAL';
+    sealStamp.appendChild(sealSpan); sealBlock.appendChild(sealStamp);
+    certFooterEl.appendChild(sealBlock);
+
+    const sigBlock = document.createElement('div');
+    sigBlock.className = 'signature-block';
+    const sigLine = document.createElement('div');
+    sigLine.className = 'sig-line'; sigLine.textContent = 'Digital Seal Registered';
+    const sigTitle = document.createElement('div');
+    sigTitle.className = 'sig-title'; sigTitle.textContent = 'REGISTRAR OF EVENTS (ULB)';
+    sigBlock.appendChild(sigLine); sigBlock.appendChild(sigTitle);
+    certFooterEl.appendChild(sigBlock);
+
+    borderInner.appendChild(certFooterEl);
+    renderTarget.appendChild(sheet);
 
     actionBar.classList.remove('hidden');
 
